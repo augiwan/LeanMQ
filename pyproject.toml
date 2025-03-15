@@ -1,14 +1,33 @@
 [project]
 name = "leanmq"
 version = "0.1.0"
-description = "Simple, efficient message queue based on Redis Streams."
+description = "A simple and efficient message queue based on Redis Streams."
 authors = [{ name = "Augustus D'Souza", email = "augustus.public@gmail.com" }]
-license = { text = "MIT" }
+license = { text = "Apache-2.0" }
 readme = "README.md"
-requires-python = ">=3.11"
-dependencies = []
+requires-python = ">=3.11,<4.0"
+dependencies = ["redis>=4.6.0", "backoff>=2.2.1"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: System :: Distributed Computing",
+    "Topic :: System :: Networking",
+]
+keywords = ["queue", "message-queue", "redis", "microservices", "streams"]
 
+[project.urls]
+"Homepage" = "https://github.com/augiwan/leanmq"
+"Bug Tracker" = "https://github.com/augiwan/leanmq/issues"
+"Documentation" = "https://github.com/augiwan/leanmq#readme"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+twine = "^6.1.0"
+build = "^1.2.2.post1"
