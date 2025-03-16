@@ -25,18 +25,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'pnpm'
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
-
-      - name: Debug PATH and pnpm
-        run: |
-          echo "PATH: $PATH"
-          which pnpm || echo "pnpm not found"
-          pnpm --version || echo "pnpm version check failed"
+        run: npm install -g pnpm
 
       - name: Install dependencies (in root)
         run: pnpm install --frozen-lockfile
