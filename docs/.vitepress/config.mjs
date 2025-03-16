@@ -12,24 +12,29 @@ export default withMermaid({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: "Home", link: "/" },
-      // { text: "Guide", link: "/guide/intro" },
+      { text: "Guide", link: "/guide/intro" },
     ],
 
-    sidebar: [
-      // {
-      //   text: "Guide",
-      //   items: [
-      //     { text: "Markdown Examples", link: "/markdown-examples" },
-      //     { text: "Runtime API Examples", link: "/api-examples" },
-      //   ],
-      // },
+    sidebar: {
+      "/guide/": [
+        {
+          text: "Hello LeanMQ",
+          items: [
+            { text: "Intro", link: "/guide/intro" },
+            { text: "Getting Started", link: "/guide/getting-started" },
+            { text: "Basic Overview", link: "/guide/basic-overview" },
+            { text: "Webhooks", link: "/guide/webhook-pattern" },
+            { text: "Why LeanMQ?", link: "/guide/why-leanmq" },
+          ],
+        },
+      ],
+    },
+
+    // topNav: [{ text: "GitHub", link: "https://github.com/augiwan/LeanMQ" }],
+
+    socialLinks: [
+      { icon: "github", link: "https://github.com/augiwan/LeanMQ" },
     ],
-
-    topNav: [{ text: "GitHub", link: "https://github.com/augiwan/LeanMQ" }],
-
-    // socialLinks: [
-    //   { icon: "github", link: "https://github.com/augiwan/LeanMQ" },
-    // ],
 
     search: {
       provider: "local",

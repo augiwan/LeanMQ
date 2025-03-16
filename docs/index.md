@@ -8,8 +8,8 @@ hero:
   tagline: "Replace your internal webhooks with a reliable, performant, and scalable MQ with a fantastic DX. "
   actions:
     - theme: brand
-      text: Read the Guide (Coming soon)
-      # link: /guide/intro
+      text: Read the Guide
+      link: /guide/intro
 
 features:
   - title: Beautiful DX
@@ -26,9 +26,6 @@ features:
     icon: 🦸
 ---
 
-
-### Get Started
-
 ```sh
 pip install leanmq
 ```
@@ -38,21 +35,18 @@ pip install leanmq
 webhook = LeanMQWebhook()
 ```
 
-### Sending a webhook is easy
+#### Sending a webhook is easy
 ```py
 # Looks very similar to a POST request
-webhook.send("/order/status/", {
-  "order_id": "ORD-12345", 
-  "status": "shipped"
-})
+webhook.send("/order/status/", {"id": "123", "status": "shipped"})
 ```
 
-### So is receiving them
+#### So is receiving them
 ```py
 # Looks just like Flask, FastAPI, etc.
 @webhook.get("/order/status/")
 def process_order_status(data):
-    print(f"Received {data.order_id} with status: {data.status}")
+    print(f"Order: {data['id']}, status: {data['status']}")
 
 # Process in a dedicated worker (or scale to 1000s)
 webhook.run_service()
@@ -62,7 +56,7 @@ webhook.process_messages()
 
 ```
 
-### And you get all of these for free
+#### &hellip; and get all of these for free
 
 No need to configure <u>retries</u> or handle <u>rate limiting</u> &bull;
 Failed webhooks automatically sent to a <u>dead letter queue</u> &bull;
