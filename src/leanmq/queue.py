@@ -248,16 +248,16 @@ class Queue:
     def _validate_message_ids(self, message_ids: List[str]) -> List[str]:
         """
         Validate and normalize message IDs to ensure they are valid Redis stream IDs.
-        
+
         Args:
             message_ids: List of message IDs to validate
-            
+
         Returns:
             List of normalized and validated Redis stream IDs
         """
         if not message_ids:
             return []
-            
+
         # Ensure we're using valid Redis stream IDs
         # Redis stream IDs must be in the format <timestamp>-<sequence>
         stream_ids = []
@@ -271,31 +271,32 @@ class Queue:
                     and mid.split("-")[0].isdigit()
                     and mid.split("-")[1].isdigit()
                 ):
-                    # This appears to be a valid Redis stream ID (timestamp-sequence format)
+                    # This appears to be a valid Redis stream ID
+                    # (timestamp-sequence format)
                     stream_ids.append(mid)
                 else:
                     # Not a valid Redis stream ID, log a warning and skip it
                     logger.warning(f"Skipping invalid Redis stream ID: {mid}")
             else:
                 logger.warning(f"Skipping message ID of unexpected type: {type(mid)}")
-                
+
         if not stream_ids:
             logger.warning("No valid Redis stream IDs found")
-            
+
         return stream_ids
-        
+
     def acknowledge_messages(self, message_ids: List[str]) -> int:
         """
         Acknowledge messages as processed without removing them from the stream.
         This marks messages as processed by the consumer group but keeps them
         in the stream for history/auditing purposes.
-        
+
         Use this method when you want to mark a message as successfully processed
         but still want to keep a record of it in the stream.
-        
+
         Args:
             message_ids: List of message IDs to acknowledge
-            
+
         Returns:
             Number of messages successfully acknowledged
         """
@@ -305,19 +306,19 @@ class Queue:
                 "either deleted with delete_messages or requeued with requeue_messages."
             )
             return 0
-            
+
         stream_ids = self._validate_message_ids(message_ids)
         if not stream_ids:
             return 0
-            
+
         # Acknowledge messages
         ack_count = self.client.xack(self.name, self.consumer_group, *stream_ids)
         return ack_count
-        
+
     def delete_messages(self, message_ids: List[str]) -> int:
         """
         Permanently delete messages from the queue.
-        
+
         For regular queues, this will both acknowledge the messages and remove them
         from the stream. For DLQs, this just removes them from the stream.
 
@@ -334,7 +335,7 @@ class Queue:
         # For regular queues, acknowledge messages first
         if not self.is_dlq:
             self.client.xack(self.name, self.consumer_group, *stream_ids)
-            
+
         # Delete messages from the stream
         del_count = self.client.xdel(self.name, *stream_ids)
 
@@ -344,18 +345,20 @@ class Queue:
             self.client.zrem(expiry_key, *stream_ids)
 
         return del_count
-        
-    def requeue_messages(self, message_ids: List[str], destination_queue: "Queue") -> int:
+
+    def requeue_messages(
+        self, message_ids: List[str], destination_queue: "Queue"
+    ) -> int:
         """
         Move messages from a DLQ back to their original queue for reprocessing.
-        
+
         This method fetches messages from the DLQ, adds them to the destination
         queue, and then removes them from the DLQ.
-        
+
         Args:
             message_ids: List of message IDs to requeue
             destination_queue: Queue to move messages to
-            
+
         Returns:
             Number of messages successfully requeued
         """
@@ -365,20 +368,20 @@ class Queue:
                 "be used on a dead letter queue."
             )
             return 0
-            
+
         if destination_queue.is_dlq:
             logger.warning(
                 "Cannot requeue messages to another DLQ. "
                 "Destination must be a regular queue."
             )
             return 0
-            
+
         stream_ids = self._validate_message_ids(message_ids)
         if not stream_ids:
             return 0
-            
+
         requeued_count = 0
-        
+
         for mid in stream_ids:
             # Get the message from the stream
             messages = self.client.xrange(
@@ -387,12 +390,12 @@ class Queue:
                 max=mid,
                 count=1,
             )
-            
+
             if not messages:
                 continue
-                
+
             message_id, data = messages[0]
-            
+
             try:
                 # Parse message
                 message_data_raw = data[b"data"]
@@ -400,31 +403,32 @@ class Queue:
                     message_data_str = message_data_raw.decode("utf-8")
                     message_data = json.loads(message_data_str)
                     metadata = message_data.get("_metadata", {})
-                    
+
                     # Add requeue info
                     if "_requeues" not in message_data:
                         message_data["_requeues"] = []
-                    
-                    message_data["_requeues"].append({
-                        "timestamp": time.time(),
-                        "from_dlq": self.name,
-                        "to_queue": destination_queue.name
-                    })
-                    
+
+                    message_data["_requeues"].append(
+                        {
+                            "timestamp": time.time(),
+                            "from_dlq": self.name,
+                            "to_queue": destination_queue.name,
+                        }
+                    )
+
                     # Send to destination queue
                     destination_queue.send_message(
-                        message_data, 
-                        message_id=metadata.get("id", str(uuid.uuid4()))
+                        message_data, message_id=metadata.get("id", str(uuid.uuid4()))
                     )
-                    
+
                     # Delete from DLQ
                     self.delete_messages([mid])
-                    
+
                     requeued_count += 1
-                    
+
             except Exception as e:
                 logger.error(f"Error requeuing message {mid}: {e}")
-                
+
         return requeued_count
 
     def purge(self) -> int:
@@ -522,7 +526,8 @@ class Queue:
                         message_data, message_id=metadata.get("id", str(uuid.uuid4()))
                     )
 
-                    # Acknowledge from original queue (we've processed it by moving to DLQ)
+                    # Acknowledge from original queue
+                    # (we've processed it by moving to DLQ)
                     self.acknowledge_messages([mid])
 
                     moved_count += 1
