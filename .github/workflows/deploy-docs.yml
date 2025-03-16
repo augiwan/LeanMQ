@@ -25,6 +25,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+          cache: pnpm
 
       - name: Install pnpm
         run: npm install -g pnpm
@@ -42,6 +43,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
+          name: github-pages
           path: docs/.vitepress/dist
 
   deploy:
@@ -50,5 +52,11 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: github-pages
+          path: ./dist
+
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v3
