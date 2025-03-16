@@ -18,10 +18,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -30,20 +28,24 @@ jobs:
           cache: 'pnpm'
 
       - name: Install pnpm
-        run: npm install -g pnpm  # This ensures pnpm is installed
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
 
-      - name: Verify pnpm installation
-        run: pnpm --version  # Check if pnpm is correctly installed
+      - name: Debug PATH and pnpm
+        run: |
+          echo "PATH: $PATH"
+          which pnpm || echo "pnpm not found"
+          pnpm --version || echo "pnpm version check failed"
 
-      - name: Install dependencies
+      - name: Install dependencies (in root)
         run: pnpm install --frozen-lockfile
-        working-directory: docs
 
       - name: Build VitePress site
         run: pnpm run docs:build
         working-directory: docs
 
-      - name: Setup Pages
+      - name: Setup GitHub Pages
         uses: actions/configure-pages@v4
 
       - name: Upload artifact
