@@ -29,10 +29,11 @@ jobs:
           node-version: '18'
           cache: 'pnpm'
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: latest
+      - name: Install pnpm
+        run: npm install -g pnpm  # This ensures pnpm is installed
+
+      - name: Verify pnpm installation
+        run: pnpm --version  # Check if pnpm is correctly installed
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
