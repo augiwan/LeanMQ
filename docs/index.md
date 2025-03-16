@@ -58,8 +58,8 @@ webhook.process_messages()
 
 #### &hellip; and get all of these for free
 
-No need to configure <u>retries</u> or handle <u>rate limiting</u> &bull;
-Failed webhooks automatically sent to a <u>dead letter queue</u> &bull;
-You can set <u>TTL</u> to automatically expire old webhooks &bull;
-<u>Atomic transactions</u> for when you need them &bull;
-<u>Persisted</u> data so no more dropped webhooks
+Freedom from [retry handling](/guide/why-leanmq.md#the-problem-with-internal-webhooks) and [rate limiting](/guide/why-leanmq.md#the-problem-with-internal-webhooks) &bull;
+Failed webhooks automatically go to a [dead letter queue](/guide/advanced/queue-management.md#dead-letter-queues-dlqs) &bull;
+[Set a TTL](/guide/advanced/queue-management#message-time-to-live-ttl) to automatically expire old webhooks &bull;
+[Persisted](/guide/why-leanmq.md#the-leanmq-solution) data so no more dropped webhooks &bull;
+[Atomic transactions](/guide/advanced/transactions.md) for when you need them
