@@ -1,6 +1,23 @@
 # LeanMQ
 
+![GitHub Repo stars](https://img.shields.io/github/stars/augiwan/LeanMQ?style=social)
+![GitHub license](https://img.shields.io/github/license/augiwan/LeanMQ)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/LeanMQ)
+![Python Version](https://img.shields.io/pypi/pyversions/LeanMQ)
+![PyPI](https://img.shields.io/pypi/v/LeanMQ)
+![PyPI - Status](https://img.shields.io/pypi/status/LeanMQ)
+![Code style: Ruff](https://img.shields.io/badge/code%20style-Ruff-261230.svg)
+![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)
+
 LeanMQ is a lightweight, Redis-based message queue for microservice communication. It provides a simple but powerful implementation using Redis Streams with support for dead-letter queues, message TTL, atomic transactions, consumer groups, and message retry tracking.
+
+<hr />
+
+### 🔥 Just getting started – show your support!
+> If you find LeanMQ interesting, consider giving it a ⭐ star on GitHub!  
+> It helps others discover it and motivates ongoing improvements.
+
+<hr />
 
 ## Features
 
