@@ -209,6 +209,12 @@
     padding-top: calc(var(--blazepress-height-header) + var(--blazepress-height-secondary-nav)) !important;
 } */
 
+@media (max-width: 960px) {
+.VPContent {
+        padding-top: calc(var(--blazepress-height-header) + var(--blazepress-height-secondary-nav)) !important;
+    }
+}
+
 .VPSidebar {
     top: calc(var(--blazepress-height-header) + var(--blazepress-height-secondary-nav)) !important;
     height: calc(100vh - var(--blazepress-height-header) - var(--blazepress-height-secondary-nav)) !important;
