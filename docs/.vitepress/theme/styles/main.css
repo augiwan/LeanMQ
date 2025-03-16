@@ -14,13 +14,9 @@
     --vp-button-brand-hover-bg: var(--vp-c-brand-light);
 
     --vp-home-hero-name-color: transparent;
-    --vp-home-hero-name-background: -webkit-linear-gradient(120deg,
-            #bd34fe 30%,
-            #4157ff);
-
-    --vp-home-hero-image-background-image: linear-gradient(-45deg,
-            #bd34fe 50%,
-            #47caff 50%);
+    --vp-home-hero-name-background: linear-gradient(160deg,
+            #0093E9 0%,
+            #80D0C7 100%);
 
     /* Typography */
     --vp-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -37,7 +33,9 @@
     --blazepress-sidebar-bg: #ffffff;
     --vp-c-divider: #e2e8f0;
     --vp-c-gutter: #e9f0ee;
-    --vp-code-block-bg: #f1f5f9;
+    --vp-code-block-bg: #f1f5f9;--vp-home-hero-name-background: linear-gradient(160deg,
+                #0093E9 0%,
+                #388ba4 100%);
 }
 
 /* Dark mode variables */
@@ -261,6 +259,11 @@
     letter-spacing: 0.5px !important;
 }
 
+/* Add margin between sections */
+section.VPSidebarItem.level-1 {
+    margin-bottom: 1rem;
+}
+
 /* Style active sidebar items */
 .VPSidebarItem .item.is-active .text {
     color: var(--vp-c-text-1) !important;
@@ -372,11 +375,6 @@
     }
 }
 
-/* Mobile sidebar */
-.VPSidebar.open {
-    z-index: 45 !important;
-}
-
 /* General fixes */
 body {
     overflow-y: scroll;
@@ -384,4 +382,8 @@ body {
 
 html {
     scroll-padding-top: calc(var(--blazepress-height-header) + var(--blazepress-height-secondary-nav));
+}
+
+.vp-doc a, u {
+    text-underline-offset: 6px;
 }

@@ -3,25 +3,39 @@ import { ref, computed, onMounted } from 'vue'
 import { useData, useRoute, withBase } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import { Sun, Moon } from 'lucide-vue-next'
-import { VPNavBarSearch } from 'vitepress/theme'
+import { VPNavBarSearch, VPSocialLinks } from 'vitepress/theme'
 
 const { Layout } = DefaultTheme
 const { site, theme, page } = useData()
 const route = useRoute()
 
 // Dark mode toggle
-const isDark = ref(true)
-const toggleDarkMode = () => {
-  isDark.value = !isDark.value
+const isDark = ref(true) // Default to dark
+
+const applyTheme = () => {
   document.documentElement.classList.toggle('dark', isDark.value)
   document.documentElement.classList.toggle('light', !isDark.value)
+  localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
 }
 
-// Initialize dark mode
+const toggleDarkMode = () => {
+  isDark.value = !isDark.value
+  applyTheme()
+}
+
+// Initialize dark mode on mount
 onMounted(() => {
-  if (theme.value.appearance === 'dark' || !theme.value.appearance) {
-    document.documentElement.classList.add('dark')
+  const storedTheme = localStorage.getItem('theme')
+
+  if (storedTheme) {
+    isDark.value = storedTheme === 'dark'
+  } else {
+    // Default to dark mode if no stored preference
+    isDark.value = true
+    localStorage.setItem('theme', 'dark')
   }
+
+  applyTheme()
 })
 
 // Top navigation links
@@ -75,12 +89,14 @@ const isActiveNav = (link) => {
             <span class="blazepress-arrow-icon">→</span>
           </a>
 
+          <VPSocialLinks :links="theme.socialLinks" />
           <button class="blazepress-theme-toggle" @click="toggleDarkMode">
             <span class="icon">
               <Sun v-if="isDark" style="height: 1rem;" />
               <Moon v-else style="height: 1rem;" />
             </span>
           </button>
+
         </div>
       </div>
     </header>
