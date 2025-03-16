@@ -7,8 +7,10 @@ using LeanMQ as the underlying message transport mechanism.
 
 import functools
 import logging
+import signal
+import threading
 import time
-from typing import Any, Callable, Dict, List, Optional, TypeVar, cast
+from typing import Any, Callable, Dict, List, Optional, TypeVar, Union, cast
 
 from leanmq.core import LeanMQ
 from leanmq.queue import Queue
@@ -19,6 +21,117 @@ logger = logging.getLogger(__name__)
 
 # Type for the decorated function
 F = TypeVar("F", bound=Callable[..., Any])
+
+
+class WebhookService:
+    """Service for processing webhook messages in a dedicated worker thread.
+
+    This class provides a long-running service that processes webhook messages
+    in a background thread, with support for graceful shutdown and error handling.
+
+    Attributes:
+        webhook: The LeanMQWebhook instance to use
+        running: Whether the service is currently running
+        worker_thread: The background thread processing messages
+    """
+
+    def __init__(
+        self,
+        webhook: "LeanMQWebhook",
+        process_count: int = 10,
+        block_for_seconds: Optional[int] = 1,
+        handle_signals: bool = True,
+        worker_thread_timeout: int = 5,
+    ) -> None:
+        """Initialize the webhook service.
+
+        Args:
+            webhook: The LeanMQWebhook instance to use
+            process_count: Maximum number of messages to process in each loop iteration
+            block_for_seconds: How long to block waiting for new messages in each iteration
+            handle_signals: Whether to register signal handlers for graceful shutdown
+            worker_thread_timeout: Timeout in seconds when waiting for worker thread to finish
+        """
+        self.webhook = webhook
+        self.process_count = process_count
+        self.block_for_seconds = block_for_seconds
+        self.worker_thread_timeout = worker_thread_timeout
+        self.running = False
+        self.worker_thread = None
+
+        # Register signal handlers for graceful shutdown if requested
+        if handle_signals:
+            signal.signal(signal.SIGINT, self._handle_signal)
+            signal.signal(signal.SIGTERM, self._handle_signal)
+
+    def _handle_signal(self, signum: int, frame: Any) -> None:
+        """Handle termination signals.
+
+        Args:
+            signum: The signal number
+            frame: The current stack frame
+        """
+        logger.info(f"Received signal {signum}, shutting down...")
+        self.stop()
+
+    def _webhook_worker(self) -> None:
+        """Worker thread for processing webhooks."""
+        logger.info("Webhook worker thread started")
+        while self.running:
+            try:
+                # Process webhooks in a loop
+                processed = self.webhook.process_messages(
+                    block=True if self.block_for_seconds else False,
+                    timeout=self.block_for_seconds,
+                    count=self.process_count,
+                )
+                if processed > 0:
+                    logger.debug(f"Processed {processed} webhook(s)")
+            except Exception as e:
+                logger.error(f"Error processing webhooks: {e}")
+                # Brief delay before retrying to avoid tight loop in case of persistent errors
+                time.sleep(1)
+        logger.info("Webhook worker thread stopped")
+
+    def start(self) -> None:
+        """Start the webhook service."""
+        if self.running:
+            logger.info("Service is already running")
+            return
+
+        self.running = True
+
+        # Start worker thread
+        self.worker_thread = threading.Thread(target=self._webhook_worker)
+        self.worker_thread.daemon = True
+        self.worker_thread.start()
+
+        logger.info("Webhook service started")
+
+    def stop(self) -> None:
+        """Stop the webhook service."""
+        if not self.running:
+            logger.info("Service is not running")
+            return
+
+        logger.info("Stopping webhook service...")
+        self.running = False
+
+        # Wait for worker thread to finish
+        if self.worker_thread and self.worker_thread.is_alive():
+            self.worker_thread.join(timeout=self.worker_thread_timeout)
+            if self.worker_thread.is_alive():
+                logger.warning("Worker thread did not stop within the timeout period")
+
+        logger.info("Webhook service stopped")
+
+    def is_alive(self) -> bool:
+        """Check if the service is running and the worker thread is alive.
+
+        Returns:
+            True if the service is running and the worker thread is alive
+        """
+        return self.running and bool(self.worker_thread and self.worker_thread.is_alive())
 
 
 class WebhookRoute:
@@ -188,12 +301,13 @@ class LeanMQWebhook:
         message_id = main_queue.send_message(message_data)
         return message_id
 
-    def process_messages(self, block: bool = False, timeout: int = 1) -> int:
+    def process_messages(self, block: bool = False, timeout: int = 1, count: int = 10) -> int:
         """Process incoming webhook messages.
 
         Args:
             block: Whether to block waiting for messages
             timeout: How long to block for in seconds
+            count: Maximum number of messages to process per queue
 
         Returns:
             Number of messages processed
@@ -210,7 +324,7 @@ class LeanMQWebhook:
                 try:
                     # Get messages from the queue
                     messages = route.queue.get_messages(
-                        count=10, block_for_seconds=timeout if block else None
+                        count=count, block_for_seconds=timeout if block else None
                     )
 
                     for message in messages:
@@ -271,3 +385,54 @@ class LeanMQWebhook:
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Close connections when exiting with statement."""
         self.close()
+
+    def run_service(
+        self,
+        process_count: int = 10,
+        block_for_seconds: Optional[int] = 1,
+        handle_signals: bool = True,
+        worker_thread_timeout: int = 5,
+        log_level: Union[int, str] = logging.INFO,
+    ) -> "WebhookService":
+        """Run a webhook service that processes messages in a dedicated worker thread.
+
+        This is a convenience method that creates and starts a WebhookService instance
+        to process webhook messages in a background thread. The service handles
+        graceful shutdown on SIGINT and SIGTERM signals by default.
+
+        Args:
+            process_count: Maximum number of messages to process in each loop iteration
+            block_for_seconds: How long to block waiting for new messages in each iteration
+            handle_signals: Whether to register signal handlers for graceful shutdown
+            worker_thread_timeout: Timeout in seconds when waiting for worker thread to finish
+            log_level: Logging level for the webhook service
+
+        Returns:
+            A running WebhookService instance
+
+        Examples:
+            >>> # Initialize webhook and register handlers
+            >>> webhook = LeanMQWebhook()
+            >>> @webhook.get("/order/status/")
+            >>> def handle_order(data):
+            >>>     print(f"Order {data['order_id']} status: {data['status']}")
+            >>> 
+            >>> # Start the service - this will process webhooks in the background
+            >>> service = webhook.run_service()
+            >>> 
+            >>> # When done, stop the service
+            >>> service.stop()
+        """
+        # Configure logging
+        logger.setLevel(log_level)
+
+        # Create and start the service
+        service = WebhookService(
+            webhook=self,
+            process_count=process_count,
+            block_for_seconds=block_for_seconds,
+            handle_signals=handle_signals,
+            worker_thread_timeout=worker_thread_timeout,
+        )
+        service.start()
+        return service

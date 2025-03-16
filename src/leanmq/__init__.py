@@ -16,6 +16,6 @@ from leanmq.core import LeanMQ
 from leanmq.message import Message
 from leanmq.queue import Queue, QueueInfo
 from leanmq.transaction import Transaction
-from leanmq.webhook import LeanMQWebhook
+from leanmq.webhook import LeanMQWebhook, WebhookService
 
-__all__ = ["LeanMQ", "Message", "Queue", "QueueInfo", "Transaction", "LeanMQWebhook"]
+__all__ = ["LeanMQ", "Message", "Queue", "QueueInfo", "Transaction", "LeanMQWebhook", "WebhookService"]
