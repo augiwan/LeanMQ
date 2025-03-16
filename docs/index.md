@@ -8,8 +8,8 @@ hero:
   tagline: "Replace your internal webhooks with a reliable, performant, and scalable MQ with a fantastic DX. "
   actions:
     - theme: brand
-      text: Read the Guide
-      link: /guide/intro
+      text: Read the Guide (Coming soon)
+      # link: /guide/intro
 
 features:
   - title: Beautiful DX

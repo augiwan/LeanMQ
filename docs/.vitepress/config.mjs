@@ -3,6 +3,7 @@ import { defineConfig } from "vitepress";
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: "LeanMQ",
+  base: "/LeanMQ/",
   description:
     "Replace your internal webhooks with a reliable, performant, and scalable MQ with a fantastic DX.",
   themeConfig: {
