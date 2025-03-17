@@ -1,6 +1,6 @@
 [project]
 name = "leanmq"
-version = "0.1.1"
+version = "0.2.0"
 description = "Replace your internal webhooks with a reliable, performant, and scalable MQ with a fantastic DX."
 authors = [{ name = "Augustus D'Souza", email = "augustus.public@gmail.com" }]
 license = { text = "Apache-2.0" }
