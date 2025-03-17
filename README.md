@@ -1,12 +1,12 @@
 # LeanMQ
 
-![GitHub Repo stars](https://img.shields.io/github/stars/augiwan/LeanMQ?style=social)
-![GitHub license](https://img.shields.io/github/license/augiwan/LeanMQ)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/LeanMQ)
-![Python Version](https://img.shields.io/pypi/pyversions/LeanMQ)
-![PyPI](https://img.shields.io/pypi/v/LeanMQ)
-![PyPI - Status](https://img.shields.io/pypi/status/LeanMQ)
-![Code style: Ruff](https://img.shields.io/badge/code%20style-Ruff-261230.svg)
+[![GitHub Repo stars](https://img.shields.io/github/stars/augiwan/LeanMQ?style=social)](https://github.com/augiwan/LeanMQ/stargazers)
+[![GitHub license](https://img.shields.io/github/license/augiwan/leanmq)](https://github.com/augiwan/LeanMQ/blob/main/LICENSE)
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/LeanMQ)](https://pypi.org/project/LeanMQ/)
+[![Python Version](https://img.shields.io/pypi/pyversions/LeanMQ)](https://pypi.org/project/LeanMQ/)
+[![PyPI](https://img.shields.io/pypi/v/LeanMQ)](https://pypi.org/project/LeanMQ/)
+[![PyPI - Status](https://img.shields.io/pypi/status/leanmq)](https://pypi.org/project/leanmq/)
+[![Code style: Ruff](https://img.shields.io/badge/code%20style-Ruff-261230.svg)](https://github.com/astral-sh/ruff)
 ![Contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)
 
 <hr />
